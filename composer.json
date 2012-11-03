@@ -1,0 +1,23 @@
+{
+    "name": "foolz/auth",
+    "type": "library",
+    "description": "A login system that uses PHP 5.5 hashing algorithms (with fallbacks for 5.4) that is meant to be easy to implement in any project where Doctrine 2 is used.",
+    "keywords": ["auth", "registration", "login", "authentication"],
+    "homepage": "http://www.foolz.us",
+    "license": "Apache-2.0",
+    "authors": [{"name": "foolz", "email": "support@foolz.us"}],
+    "support": {
+        "email": "support@foolz.us",
+        "irc": "irc://irc.irchighway.net/fooldriver"
+    },
+    "require": {
+        "php": ">=5.4.0",
+		"doctrine/dbal": ">=2.3.0",
+		"ircmaxell/password-compat": ">=1.0.0-beta1"
+    },
+    "autoload": {
+        "psr-0": {
+            "Foolz\\Auth": "classes/"
+        }
+    }
+}
