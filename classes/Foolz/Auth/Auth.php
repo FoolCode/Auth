@@ -26,10 +26,22 @@ class Auth
 	 */
 	public static function instantiate(\Foolz\Auth\Config $config, $instance_name = 'default')
 	{
-		static::$instances[$instance_name] = $config;
+		$auth = new static();
+
+		$auth->setConfig($config);
+
+		static::$instances[$instance_name] = $auth;
 	}
 
-	public static function forge($instance_name)
+	/**
+	 * Returns a instantiated instance
+	 *
+	 * @param $instance_name
+	 *
+	 * @return  Config
+	 * @throws  \OutOfRangeException
+	 */
+	public static function forge($instance_name = 'default')
 	{
 		if ( ! isset(static::$instances[$instance_name]))
 		{

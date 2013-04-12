@@ -183,7 +183,7 @@ class User
 	 *
 	 * @return  array|false  Array if found, false if not found
 	 */
-	public static function getUserRowBy($field, $value)
+	public function getUserRowBy($field, $value)
 	{
 		return $this->getQB()
 			->select('*')
@@ -201,7 +201,7 @@ class User
 	 *
 	 * @return  array|false  Array if found, false if not found
 	 */
-	public static function getByUsernameOrEmail($username_or_email)
+	public function getByUsernameOrEmail($username_or_email)
 	{
 		return $this->getQB()
 			->select('*')
