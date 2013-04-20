@@ -8,11 +8,11 @@ namespace Foolz\Auth\Config;
 class Local
 {
 	/**
-	 * The user ID
+	 * The name of the engine
 	 *
-	 * @var  int
+	 * @var string
 	 */
-	protected $id = null;
+	public $engine_name = 'local';
 
 	/**
 	 * The username
@@ -49,29 +49,7 @@ class Local
 	 */
 	protected $login_table = null;
 
-	/**
-	 * Set the ID
-	 *
-	 * @param  int  $id  The ID
-	 *
-	 * @return  \Foolz\Auth\Config\Local  The current object
-	 */
-	public function setId($id)
-	{
-		$this->id = $id;
 
-		return $this;
-	}
-
-	/**
-	 * Return the ID
-	 *
-	 * @return  int  The ID
-	 */
-	public function getId()
-	{
-		return $this->id;
-	}
 
 	/**
 	 * Set the username

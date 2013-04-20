@@ -84,12 +84,17 @@ class Auth
 	{
 		if ($this->engine === null)
 		{
-			$class = '\Foolz\Auth\Engine\\'.Util::lowercaseToClassName($this->getConfig()->getEngine());
+			$class = '\Foolz\Auth\Engine\\'.Util::lowercaseToClassName($this->getConfig()->engine_name);
 
 			$this->engine = new $class();
 			$this->engine->setConfig($this->getConfig());
 		}
 
 		return $this->engine;
+	}
+
+	public function getId()
+	{
+		$user = $this->engine->getUser();
 	}
 }

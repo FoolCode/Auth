@@ -19,11 +19,11 @@ class Config
 	public $users_table = null;
 
 	/**
-	 * The ID of the current login hash
+	 * The user ID of the current login hash
 	 *
 	 * @var  int
 	 */
-	public $auto_login_hash_id = null;
+	public $auto_login_hash_user_id = null;
 
 	/**
 	 * The auto login hash (not the same as database, where it's hashed)
@@ -33,11 +33,32 @@ class Config
 	public $auto_login_hash = null;
 
 	/**
+	 * The auto login hash light that doesn't get hashed in database
+	 *
+	 * @var  string
+	 */
+	public $auto_login_hash_light = null;
+
+	/**
 	 * The table for auto login hashes
 	 *
 	 * @var  string
 	 */
 	public $auto_login_table = null;
+
+	/**
+	 * The user ID
+	 *
+	 * @var  int
+	 */
+	protected $id = null;
+
+	/**
+	 * The json array
+	 *
+	 * @var null|array
+	 */
+	public $json = null;
 
 	/**
 	 * Set a Doctrine DBAL Connection
@@ -96,13 +117,13 @@ class Config
 	/**
 	 * For speed, we also use the login_hash_id so we can check against a single one
 	 *
-	 * @param  int  $auto_login_hash_id  The login hash ID
+	 * @param  int  $auto_login_hash_user_id  The login hash ID
 	 *
 	 * @return  \Foolz\Auth\Config  The current object
 	 */
-	public function setAutoLoginHashId($auto_login_hash_id)
+	public function setAutoLoginHashUserId($auto_login_hash_user_id)
 	{
-		$this->auto_login_hash_id = $auto_login_hash_id;
+		$this->auto_login_hash_id = $auto_login_hash_user_id;
 
 		return $this;
 	}
@@ -142,6 +163,30 @@ class Config
 	}
 
 	/**
+	 * Returns the login_hash_id
+	 *
+	 * @return  int  The login hash ID
+	 */
+	public function getAutoLoginHashLight()
+	{
+		return $this->auto_login_hash_id;
+	}
+
+	/**
+	 * Set the login hash for automatic login
+	 *
+	 * @param  string  $auto_login_hash  The login hash before database hashing
+	 *
+	 * @return  \Doctrine\DBAL\Connection  The connection
+	 */
+	public function setAutoLoginHashLight($auto_login_hash_light)
+	{
+		$this->auto_login_hash_light = $auto_login_hash_light;
+
+		return $this;
+	}
+
+	/**
 	 * Sets the name of the auto login table
 	 *
 	 * @param  string  $table_name  The table name
@@ -163,5 +208,58 @@ class Config
 	public function getAutoLoginTable()
 	{
 		return $this->auto_login_table;
+	}
+
+	/**
+	 * Set the user ID
+	 *
+	 * @param  int  $id  The user ID
+	 *
+	 * @return  \Foolz\Auth\Config\Local  The current object
+	 */
+	public function setId($id)
+	{
+		$this->id = $id;
+
+		return $this;
+	}
+
+	/**
+	 * Return the user ID
+	 *
+	 * @return  int  The user ID
+	 */
+	public function getId()
+	{
+		return $this->id;
+	}
+
+	/**
+	 * Decodes the JSON and sets it as associative array
+	 *
+	 * @param array $json
+	 *
+	 * @return $this
+	 */
+	public function setJson($json)
+	{
+		if ($json !== null)
+		{
+			$this->json = json_decode($json, true);
+		}
+		else
+		{
+			$this->json = null;
+		}
+
+		return $this;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getJson()
+	{
+		return $this->json;
 	}
 }

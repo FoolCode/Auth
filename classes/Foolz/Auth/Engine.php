@@ -36,44 +36,116 @@ class Engine
 	}
 
 	/**
+	 * Shorthand to get the connection
+	 *
+	 * @return  \Doctrine\DBAL\Connection
+	 */
+	public function getConnection()
+	{
+		return $this->getConfig()->getConnection();
+	}
+
+	/**
+	 * Returns an instance of the Doctrine DBAL Query Builder
+	 *
+	 * @return  \Doctrine\DBAL\Query\QueryBuilder
+	 */
+	public function getQB()
+	{
+		return $this->getConnection()->createQueryBuilder();
+	}
+
+	public function login()
+	{
+		$user = $this->getQB()
+			->select('*')
+			->from($this->getConfig()->getUsersTable(), 'u')
+			->where('u.id = :id')
+			->setParameter(':id', $this->getConfig()->getId())
+			->execute()
+			->fetch();
+
+		if ( ! $user)
+		{
+			throw new \Foolz\Auth\Exception\UserNotFound('The user was not found with the supplied data.');
+		}
+
+		$this->getConfig()->setJson($user['json']);
+
+		$this->setAutoLogin();
+	}
+
+	/**
 	 * Login the user with the inbuilt autologin system
 	 *
+	 * @throws Exception\UserNotFound
 	 * @return  int
 	 */
 	public function autoLogin()
 	{
-		$result = $this->getQB()
+		$result = $this->getConnection()
+			->createQueryBuilder()
 			->select('*')
 			->from($this->getConfig()->getAutoLoginTable(), 'th')
-			->where('id = :login_hash_id')
-			->where('created > :time + 259200')
+			->where('th.user_id = :user_id')
+			->andWhere('th.hash = :hash')
+			->andWhere('th.created > :time - 259200')
 			->setParameters([
-				':login_hash_id' => $this->getConfig()->getLoginHashId(),
+				':user_id' => $this->getConfig()->getLoginHashUserId(),
+				':hash_light' => $this->getConfig()->getLoginHashLight(),
 				':time' => time()
 			])
 			->execute()
 			->fetch();
 
-		if ($result && password_verify($this->getConfig()->getLoginHash(), $result['login_hash']))
+
+		if ($result && password_verify($this->getConfig()->getAutoLoginHash(), $result['login_hash']))
 		{
-			return $result['user_id'];
+			$this->getConfig()->setId($result['user_id']);
+			return static::login();
 		}
 
-		throw new \Foolz\Auth\Exception\UserNotFound;
+		throw new \Foolz\Auth\Exception\UserNotFound('No user with this login hash.');
 	}
 
-	public function setAutoLogin($user)
+	public function setAutoLogin()
 	{
-		sha1(uniqid(time().$user->id));
+		$key = sha1(uniqid(time().$this->getConfig()->getId()));
+
+		$this->getConfig()->setAutoLoginHash($key);
+
+		$this->getConnection()->insert($this->getConfig()->getAutoLoginTable() ,[
+			'user_id' => $this->getConfig()->getId(),
+			'hash' => $key,
+			'created' => new \DateTime(),
+			'ip' => isset($_SERVER['REMOTE_ADDR']) ? \Foolz\Inet\Inet::ptod($_SERVER['REMOTE_ADDR']) : null,
+			'agent' => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null
+		]);
 	}
 
-	public function register()
+	/**
+	 * Creates a new user entry and returns its user_id
+	 */
+	public function createUser()
 	{
-		throw new \Foolz\Auth\Exception\Misconfiguration('Invalid call if a specific engine isn\'t set and the method is not overridden.');
+		$this->getConnection()
+			->insert($this->getConfig()->getLoginTable(), [
+				'json' => null
+			]);
+
+		return $this->getConnection()->lastInsertId();
 	}
 
-	public function delete()
+	/**
+	 * Removes the user from the users table
+	 */
+	public function deleteUser()
 	{
-
+		$this->getConnection()
+			->createQueryBuilder()
+			->delete($this->getConfig()->getUsersTable(), 'u')
+			->where('id = :id')
+			->setParameter(':id', $this->getConfig()->getId())
+			->execute();
 	}
 }
